@@ -40,6 +40,12 @@ This will start all required services:
 - Redis broker
 - MongoDB backend
 
+3. When you're done, stop all services using Docker Compose:
+
+```bash
+docker compose down
+```
+
 ## API Endpoints
 
 - `POST /create-task`: Create a new task with optional metadata
