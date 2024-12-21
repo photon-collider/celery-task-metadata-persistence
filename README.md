@@ -3,6 +3,8 @@
 
 A tutorial demonstrating how to build a FastAPI application with Celery for asynchronous task processing. This demo showcases how to use Redis as a message broker and implement a custom MongoDB backend to preserve task metadata. Perfect for learning how to handle long-running tasks in FastAPI while maintaining additional task information.
 
+This demo complements my blog post about using custom MongoDB backends with Celery.
+
 ## Table of Contents
 - [Celery Task Metadata Persistence](#celery-task-metadata-persistence)
   - [Table of Contents](#table-of-contents)
@@ -23,8 +25,8 @@ A tutorial demonstrating how to build a FastAPI application with Celery for asyn
 
 1. Clone the repository:
 ```bash
-git clone <your-repository-url>
-cd <repository-name>
+git clone git@github.com:photon-collider/celery-task-metadata-persistence.git
+cd celery-task-metadata-persistence
 ```
 
 2. Start the services using Docker Compose:
