@@ -5,9 +5,11 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
 
   mongodb:
     image: mongo:latest
@@ -15,7 +17,42 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+    environment:
+      - GLIBC_TUNABLES=glibc.pthread.rseq=0 # Fixes the rseq warning
+    ulimits:
+      memlock: -1 # Recommended for production environments
+    command: ["mongod", "--logpath", "/dev/null"] # Reduces logging verbosity
+
+  celery_worker:
+    build: .
+    command: "celery -A app.tasks worker --loglevel=INFO -c 1"
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - mongodb
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - MONGODB_HOST=mongodb://mongodb:27017/celery_result_db
+
+  celery_app:
+    build: .
+    command: "fastapi run app/main.py --port 8000 --host 0.0.0.0"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - celery_worker
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - MONGODB_HOST=mongodb://mongodb:27017/celery_result_db
 
 volumes:
-  redis_data:
   mongodb_data:
